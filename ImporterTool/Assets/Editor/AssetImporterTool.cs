@@ -38,29 +38,30 @@ public class AssetImporterTool : MonoBehaviour
 
     static void FindImportSettings(string pathToSearch)
     {
-        string[] importSettingsGUIDs = AssetDatabase.FindAssets("t:ImportSettings", new[] { pathToSearch });
+        //Attempt to get the ImportSettings scriptable object at this path.
+        //I'm not happy with using a string here and not allowing the user the freedom to rename the ImportSettings asset. 
+        //I attempted to use AssetDatabase.FindAssets, but it does a BFS on the path it's assigned so it doesn't work with my upwards recursive approach        
+        ImportSettings importSettings = AssetDatabase.LoadAssetAtPath<ImportSettings>(pathToSearch + "/ImportSettings.asset");
 
-        if (importSettingsGUIDs.Length == 0)
+        //Search recursively up the directory structure until we either find 
+        //import settings or reach the main Assets folder with no results
+        if (importSettings == null)
         {
-            //We've reached the main Assets folder. Stop searching and warn theuser that no settings wered found
+            //We've reached the main Assets folder. Stop searching and warn the user that no settings were found
             if (pathToSearch == "Assets")
             {
-                Debug.LogWarning("No import settings found. Use Right Click > Create > Import Settings to create some");
+                Debug.Log("No import settings founds. Use Right Click > Create > ImportSettings to create some");
             }
             else
             {
+                //We didn't find anything in this directory. Let's try checking one level up.
                 pathToSearch = System.IO.Directory.GetParent(pathToSearch).ToString();
                 FindImportSettings(pathToSearch);
             }
         }
         else //We found an ImportSettings object to use
         {
-            foreach (string guid in importSettingsGUIDs)
-            {
-                string settingsPath = AssetDatabase.GUIDToAssetPath(guid);
-                ImportSettings settingsObject = AssetDatabase.LoadAssetAtPath<ImportSettings>(settingsPath);
-                Debug.Log($"Found settings: {settingsPath}");
-            }
+            Debug.Log("Found settings: " + pathToSearch);
         }
     }
 }
