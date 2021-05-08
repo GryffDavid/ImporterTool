@@ -10,33 +10,36 @@ public class AssetImporterTool : MonoBehaviour
     {
         string path = AssetDatabase.GetAssetPath(Selection.activeObject);
 
-        FindImportSettings(path); //Just testing 
+        ImportSettings importSettings = FindImportSettings(path);
 
         AssetImporter importer = AssetImporter.GetAtPath(path);
 
         TextureImporter textureImporter;
         AudioImporter audioImporter;
 
-        if (textureImporter = importer as TextureImporter)
+        if (importSettings != null)
         {
-            textureImporter.filterMode = FilterMode.Trilinear;
-            textureImporter.maxTextureSize = 1024;
-            textureImporter.anisoLevel = 16;
-        }
+            if (textureImporter = importer as TextureImporter)
+            {
+                textureImporter.filterMode = importSettings.TetxureFilterMode;
+                textureImporter.maxTextureSize = (int)importSettings.MaxTextureSize;
+                textureImporter.anisoLevel = importSettings.FilterLevel;
+            }
 
-        if (audioImporter = importer as AudioImporter)
-        {
-            AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings();
-            audioImportSettings.sampleRateSetting = AudioSampleRateSetting.OptimizeSampleRate;
-            audioImportSettings.loadType = AudioClipLoadType.CompressedInMemory;
+            if (audioImporter = importer as AudioImporter)
+            {
+                AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings();
+                audioImportSettings.sampleRateSetting = AudioSampleRateSetting.OptimizeSampleRate;
+                audioImportSettings.loadType = AudioClipLoadType.CompressedInMemory;
 
-            audioImporter.defaultSampleSettings = audioImportSettings;
+                audioImporter.defaultSampleSettings = audioImportSettings;
+            }
         }
 
         AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
     }
 
-    static void FindImportSettings(string pathToSearch)
+    static ImportSettings FindImportSettings(string pathToSearch)
     {
         //Attempt to get the ImportSettings scriptable object at this path.
         //I'm not happy with using a string here and not allowing the user the freedom to rename the ImportSettings asset. 
@@ -56,12 +59,15 @@ public class AssetImporterTool : MonoBehaviour
             {
                 //We didn't find anything in this directory. Let's try checking one level up.
                 pathToSearch = System.IO.Directory.GetParent(pathToSearch).ToString();
-                FindImportSettings(pathToSearch);
+                return FindImportSettings(pathToSearch);
             }
         }
         else //We found an ImportSettings object to use
         {
             Debug.Log("Found settings: " + pathToSearch);
+            return importSettings;
         }
+
+        return null;
     }
 }
