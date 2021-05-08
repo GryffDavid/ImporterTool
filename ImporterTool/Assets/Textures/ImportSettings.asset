@@ -12,3 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b620230bb1392645adc281f7fe9fbdb, type: 3}
   m_Name: ImportSettings
   m_EditorClassIdentifier: 
+  TetxureFilterMode: 0
+  AudioSampleRate: 0
+  MaxTextureSize: 2048

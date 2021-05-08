@@ -13,6 +13,7 @@ public class AssetImporterTool : MonoBehaviour
         TextureImporter importer = (TextureImporter)AssetImporter.GetAtPath(path);
         importer.filterMode = FilterMode.Trilinear;
         importer.maxTextureSize = 1024;
+        importer.anisoLevel = 16;
 
         AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
     }
