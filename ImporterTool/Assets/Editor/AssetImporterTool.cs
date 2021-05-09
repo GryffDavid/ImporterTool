@@ -31,13 +31,26 @@ public class AssetImporterTool : MonoBehaviour
         //Find all the textures and audio in this folder, including subfolders
         string[] assetGUIDs = AssetDatabase.FindAssets("t:texture t:audioclip", new[] { path });
 
-        //Get the path of the asset from the GUID, then find the correct settings for that asset and apply them.
+        //Use a HashSet to get a list of unique folders where assets reside. 
+        //Then loop through each asset in each unique folder, applying the relevant settings
+        HashSet<string> assetFolders = new HashSet<string>();
         foreach (string assetGUID in assetGUIDs)
+        {            
+            assetFolders.Add(Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(assetGUID)));
+        }
+
+        foreach (string folder in assetFolders)
         {
-            //I know that in this current state, the FindImportSettings function is run for every asset which isn't optimal, this is just for testing.
-            string assetPath = AssetDatabase.GUIDToAssetPath(assetGUID);
-            currentSettings = FindImportSettings(assetPath);
-            ApplyImportSettingsToAsset(assetPath, currentSettings);
+            Object[] assetsInFolder = GetAssetsOfTypeAtPzth<Object>(folder);
+            ImportSettings newSettings = FindImportSettings(folder);
+
+            if (newSettings != null)
+            {
+                foreach (Object asset in assetsInFolder)
+                {
+                    ApplyImportSettingsToAsset(AssetDatabase.GetAssetPath(asset.GetInstanceID()), newSettings);
+                }
+            }
         }
     }
 
