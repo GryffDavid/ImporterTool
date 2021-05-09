@@ -142,7 +142,7 @@ public class AssetImporterTool : MonoBehaviour
         }
         else
         {
-            Debug.Log("Not import settings found");
+            Debug.Log($"No import settings found for asset { assetPath } ");
         }        
     }
 
@@ -196,7 +196,7 @@ public class AssetImporterTool : MonoBehaviour
         {            
             if (pathToSearch == "Assets") //We've reached the main Assets folder. Stop searching and warn the user that no settings were found
             {
-                Debug.Log("No import settings founds. Use Right Click > Create > ImportSettings to create some");
+                Debug.Log("No import settings found. Use Right Click > Create > ImportSettings to create some");
             }
             else
             {
@@ -209,11 +209,17 @@ public class AssetImporterTool : MonoBehaviour
         {
             if (importSettings.Length > 1)
             {
-                Debug.Log($"More than 1 ImportSettings object was found. Defaulting to first object found: {importSettings[0].name}");
+                Debug.Log($"More than 1 settings object was found. Defaulting to first object found: { AssetDatabase.GetAssetPath(importSettings[0]) }");
             }
             else
             {
-                Debug.Log($"Found settings: {pathToSearch}");
+                Debug.Log($"Found settings: { AssetDatabase.GetAssetPath(importSettings[0]) }");                
+            }
+
+            if (((ImportSettings)importSettings[0]).UseAudioSettings == false &&
+                ((ImportSettings)importSettings[0]).UseTextureSettings == false)
+            {
+                Debug.LogWarning($"Warning! Settings found at { AssetDatabase.GetAssetPath(importSettings[0]) } are disabled. Enable 'Use Audio Settings' or 'Use Texture Settings' for settings to work");
             }
 
             return (ImportSettings)importSettings[0];

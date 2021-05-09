@@ -12,7 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b620230bb1392645adc281f7fe9fbdb, type: 3}
   m_Name: ImportSettings
   m_EditorClassIdentifier: 
-  FilterLevel: 1
-  TetxureFilterMode: 0
+  UseAudioSettings: 1
   AudioSampleRate: 0
+  SampleRateOverride: 0
+  CompressionFormat: 0
+  AudioLoadType: 0
+  UseTextureSettings: 1
+  TetxureFilterMode: 0
+  FilterLevel: 1
   MaxTextureSize: 2048
+  OverrideAndroidAudioSettings: 0
+  AndroidAudioSampleRate: 0
+  AndroidSampleRateOverride: 0
+  AndroidCompressionFormat: 0
+  AndroidAudioClipLoadType: 0
+  OverrideAndroidTextureSettings: 0
+  AndroidMaxTextureSize: 2048

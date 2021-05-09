@@ -63,6 +63,8 @@ public class ImportEditorLayout : Editor
         EditorGUI.EndDisabledGroup();
         #endregion
 
+        //If we want to use the default layout for ease-of-use, comment out the above section and enable the following line:
+        //It does make the inspector slightly less user friendly, but does make the settings easier to extend
         //base.OnInspectorGUI();
     }
 }
