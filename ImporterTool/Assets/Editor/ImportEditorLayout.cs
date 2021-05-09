@@ -15,10 +15,13 @@ public class ImportEditorLayout : Editor
         settings.UseAudioSettings = GUILayout.Toggle(settings.UseAudioSettings, "Use Audio Settings");
 
         EditorGUI.BeginDisabledGroup(!settings.UseAudioSettings);
+
         settings.AudioSampleRate = (AudioSampleRateSetting)EditorGUILayout.EnumPopup("Audio Sample Rate", settings.AudioSampleRate);
+
         EditorGUI.BeginDisabledGroup(!(settings.AudioSampleRate == AudioSampleRateSetting.OverrideSampleRate));
         settings.SampleRateOverride = (ImportSettings.SampleRateOverrideEnum)EditorGUILayout.EnumPopup("Audio Sample Rate Override", settings.SampleRateOverride);
         EditorGUI.EndDisabledGroup();
+
         settings.CompressionFormat = (AudioCompressionFormat)EditorGUILayout.EnumPopup("Audio Compression Format", settings.CompressionFormat);
         settings.AudioLoadType = (AudioClipLoadType)EditorGUILayout.EnumPopup("Audio Clip Load Type", settings.AudioLoadType);
 
@@ -26,12 +29,16 @@ public class ImportEditorLayout : Editor
         GUILayout.Space(10);
         settings.OverrideAndroidAudioSettings = GUILayout.Toggle(settings.OverrideAndroidAudioSettings, "Override Audio Settings for Android");
         EditorGUI.BeginDisabledGroup(!settings.OverrideAndroidAudioSettings);
+
         settings.AndroidAudioSampleRate = (AudioSampleRateSetting)EditorGUILayout.EnumPopup("Audio Sample Rate", settings.AndroidAudioSampleRate);
+
         EditorGUI.BeginDisabledGroup(!(settings.AndroidAudioSampleRate == AudioSampleRateSetting.OverrideSampleRate));
         settings.AndroidSampleRateOverride = (ImportSettings.SampleRateOverrideEnum)EditorGUILayout.EnumPopup("Audio Sample Rate Override", settings.AndroidSampleRateOverride);
         EditorGUI.EndDisabledGroup();
+
         settings.AndroidCompressionFormat = (AudioCompressionFormat)EditorGUILayout.EnumPopup("Audio Compression Format", settings.AndroidCompressionFormat);
         settings.AndroidAudioClipLoadType = (AudioClipLoadType)EditorGUILayout.EnumPopup("Audio Clip Load Type", settings.AndroidAudioClipLoadType);
+
         EditorGUI.EndDisabledGroup();
         #endregion 
 
@@ -55,6 +62,7 @@ public class ImportEditorLayout : Editor
         #region Android Texture Settings
         GUILayout.Space(10);
         settings.OverrideAndroidTextureSettings = GUILayout.Toggle(settings.OverrideAndroidTextureSettings, "Override Texture Settings for Android");
+
         EditorGUI.BeginDisabledGroup(!settings.OverrideAndroidTextureSettings);
         settings.AndroidMaxTextureSize = (ImportSettings.MaxTextureSizeEnum)EditorGUILayout.EnumPopup("Max Android Texture Size", settings.AndroidMaxTextureSize);
         EditorGUI.EndDisabledGroup();

@@ -13,7 +13,7 @@ public class AssetImporterTool : MonoBehaviour
     {
         s_validAssetCount = 0;
         string assetPath = "Assets";
-        string settingsPath = "Assets";
+        string settingsSearchPath = "Assets";
         ImportSettings currentSettings = null;
 
         //Go through each object the user has selected - both folders and files
@@ -25,10 +25,10 @@ public class AssetImporterTool : MonoBehaviour
             if (!string.IsNullOrEmpty(assetPath) && File.Exists(assetPath))
             {
                 //Only search for new settings if the directory of the selected files has changed
-                if (Path.GetDirectoryName(settingsPath) != Path.GetDirectoryName(assetPath))
+                if (Path.GetDirectoryName(settingsSearchPath) != Path.GetDirectoryName(assetPath))
                 {
-                    settingsPath = assetPath;
-                    currentSettings = FindImportSettings(settingsPath);
+                    settingsSearchPath = assetPath;
+                    currentSettings = FindImportSettings(settingsSearchPath);
                 }
                 
                 ApplyImportSettingsToAsset(assetPath, currentSettings);
@@ -49,7 +49,7 @@ public class AssetImporterTool : MonoBehaviour
                     //This asset is a new folder, apply settings to all the assets inside
                     if (assetFolders.Add(folderPath))
                     {
-                        Object[] assetsInFolder = GetAssetsOfTypeAtPzth<Object>(folderPath);
+                        Object[] assetsInFolder = GetAssetsOfTypeAtPath<Object>(folderPath);
                         ImportSettings newSettings = FindImportSettings(folderPath);
 
                         //If we found valid settings that apply to this folder, apply them to each asset we found in the folder
@@ -84,7 +84,7 @@ public class AssetImporterTool : MonoBehaviour
             {
                 TextureImporter textureImporter = (TextureImporter)importer;
 
-                //TODO: If this is set to false, the assets need to be stopped from using android overrides
+                //User wants to override the Android texture settings, create the appropriate settings and override them for Android
                 if (importSettings.OverrideAndroidTextureSettings == true)
                 {
                     TextureImporterPlatformSettings androidTextureSettings = new TextureImporterPlatformSettings()
@@ -122,6 +122,7 @@ public class AssetImporterTool : MonoBehaviour
                     loadType = importSettings.AudioLoadType                    
                 };
 
+                //User wants to override the Android audio settings, create the appropriate settings and override them for Android
                 if (importSettings.OverrideAndroidAudioSettings == true)
                 {
                     AudioImporterSampleSettings androidAudioImportSettings = new AudioImporterSampleSettings()
@@ -159,7 +160,7 @@ public class AssetImporterTool : MonoBehaviour
     /// <typeparam name="T">Type of asset to find</typeparam>
     /// <param name="path">Path to search in</param>
     /// <returns>Returns an array of assets</returns>
-    public static Object[] GetAssetsOfTypeAtPzth<T>(string path)
+    public static Object[] GetAssetsOfTypeAtPath<T>(string path)
     {
         //If this path is actually to a file, make sure to just get the directory.
         if (File.Exists(path))
@@ -195,7 +196,7 @@ public class AssetImporterTool : MonoBehaviour
     public static ImportSettings FindImportSettings(string pathToSearch)
     {
         //Find valid import settings in this path
-        Object[] importSettings = GetAssetsOfTypeAtPzth<ImportSettings>(pathToSearch);
+        Object[] importSettings = GetAssetsOfTypeAtPath<ImportSettings>(pathToSearch);
 
         //Search recursively up the directory structure until we either find 
         //import settings or reach the main Assets folder with no results
@@ -214,6 +215,7 @@ public class AssetImporterTool : MonoBehaviour
         }
         else //We found an ImportSettings object to use
         {
+            //Only return the first settings object found, but warn the user if multiple settings objects (In the same folder) were found
             if (importSettings.Length > 1)
             {
                 Debug.Log($"More than 1 settings object was found. Defaulting to first object found: { AssetDatabase.GetAssetPath(importSettings[0]) }");
@@ -223,12 +225,14 @@ public class AssetImporterTool : MonoBehaviour
                 Debug.Log($"Found settings: { AssetDatabase.GetAssetPath(importSettings[0]) }");                
             }
 
-            if (((ImportSettings)importSettings[0]).UseAudioSettings == false &&
+            //If the settings found are set up in such a way that audio and texture settings are disabled, warn the user that 
+            //the settings found won't do anything and tell them where to find the broken settings
+            if (((ImportSettings)importSettings[0]).UseAudioSettings == false && 
                 ((ImportSettings)importSettings[0]).UseTextureSettings == false)
             {
                 Debug.LogWarning($"Warning! Settings found at { AssetDatabase.GetAssetPath(importSettings[0]) } are disabled. Enable 'Use Audio Settings' or 'Use Texture Settings' for settings to work");
             }
-
+            
             return (ImportSettings)importSettings[0];
         }
 
