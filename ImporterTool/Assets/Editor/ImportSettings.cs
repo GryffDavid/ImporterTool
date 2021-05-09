@@ -20,12 +20,27 @@ public class ImportSettings : ScriptableObject
         _8192 = 8192
     };
 
+    [Header("Audio Settings")]
+    public AudioSampleRateSetting AudioSampleRate;
+    public AudioCompressionFormat CompressionFormat;
+    public AudioClipLoadType AudioLoadType;    
+
+    [Header("Texture Settings")]
+    public FilterMode TetxureFilterMode;
+
     [Range(0, 16)]
     public int FilterLevel = 1;
 
-    public FilterMode TetxureFilterMode;
-    public AudioSampleRateSetting AudioSampleRate;
-    public AudioClipLoadType AudioLoadType;
-    
     public MaxTextureSizeEnum MaxTextureSize = MaxTextureSizeEnum._2048;
+
+    [Header("Android Override Settings")]    
+    public bool OverrideSettingsForAndroid = false;
+
+    [Space(10)]
+    public AudioSampleRateSetting AndroidAudioSampleRate;
+    public AudioCompressionFormat AndroidCompressionFormat;
+    public AudioClipLoadType AndroidAudioClipLoadType;
+
+    [Space(10)]
+    public MaxTextureSizeEnum AndroidMaxTextureSize = MaxTextureSizeEnum._2048;
 }

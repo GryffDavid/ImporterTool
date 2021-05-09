@@ -66,6 +66,19 @@ public class AssetImporterTool : MonoBehaviour
         {
             if (textureImporter = importer as TextureImporter)
             {
+                //TODO: If this is set to false, the assets need to be stopped from using android overrides
+                if (importSettings.OverrideSettingsForAndroid == true)
+                {
+                    TextureImporterPlatformSettings androidTextureSettings = new TextureImporterPlatformSettings()
+                    {
+                        name = "Android",
+                        maxTextureSize = (int)importSettings.AndroidMaxTextureSize,
+                        overridden = true
+                    };
+
+                    textureImporter.SetPlatformTextureSettings(androidTextureSettings);
+                }
+
                 textureImporter.filterMode = importSettings.TetxureFilterMode;
                 textureImporter.maxTextureSize = (int)importSettings.MaxTextureSize;
                 textureImporter.anisoLevel = importSettings.FilterLevel;
@@ -76,8 +89,21 @@ public class AssetImporterTool : MonoBehaviour
                 AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings()
                 {
                     sampleRateSetting = importSettings.AudioSampleRate,
+                    compressionFormat = importSettings.CompressionFormat,
                     loadType = importSettings.AudioLoadType
                 };
+
+                if (importSettings.OverrideSettingsForAndroid == true)
+                {
+                    AudioImporterSampleSettings androidAudioImportSettings = new AudioImporterSampleSettings()
+                    {
+                        sampleRateSetting = importSettings.AndroidAudioSampleRate,
+                        compressionFormat = importSettings.AndroidCompressionFormat,
+                        loadType = importSettings.AndroidAudioClipLoadType
+                    };
+
+                    audioImporter.SetOverrideSampleSettings("Android", androidAudioImportSettings);
+                }
 
                 audioImporter.defaultSampleSettings = audioImportSettings;
             }
