@@ -12,6 +12,9 @@ public class ImportEditorLayout : Editor
 
         #region Audio import settings custom inspector layout
         EditorGUILayout.LabelField("Audio Settings", EditorStyles.boldLabel);
+        settings.UseAudioSettings = GUILayout.Toggle(settings.UseAudioSettings, "Use Audio Settings");
+
+        EditorGUI.BeginDisabledGroup(!settings.UseAudioSettings);
         settings.AudioSampleRate = (AudioSampleRateSetting)EditorGUILayout.EnumPopup("Audio Sample Rate", settings.AudioSampleRate);
         EditorGUI.BeginDisabledGroup(!(settings.AudioSampleRate == AudioSampleRateSetting.OverrideSampleRate));
         settings.SampleRateOverride = (ImportSettings.SampleRateOverrideEnum)EditorGUILayout.EnumPopup("Audio Sample Rate Override", settings.SampleRateOverride);
@@ -31,12 +34,17 @@ public class ImportEditorLayout : Editor
         settings.AndroidAudioClipLoadType = (AudioClipLoadType)EditorGUILayout.EnumPopup("Audio Clip Load Type", settings.AndroidAudioClipLoadType);
         EditorGUI.EndDisabledGroup();
         #endregion 
+
+        EditorGUI.EndDisabledGroup();
         #endregion
 
         GUILayout.Space(10);
 
         #region Texture import settings custom inspector layout
         EditorGUILayout.LabelField("Texture Settings", EditorStyles.boldLabel);
+        settings.UseTextureSettings = GUILayout.Toggle(settings.UseTextureSettings, "Use Texture Settings");
+
+        EditorGUI.BeginDisabledGroup(!settings.UseTextureSettings);
         settings.MaxTextureSize = (ImportSettings.MaxTextureSizeEnum)EditorGUILayout.EnumPopup("Max Texture Size", settings.MaxTextureSize);
         settings.TetxureFilterMode = (FilterMode)EditorGUILayout.EnumPopup("Filter Mode", settings.TetxureFilterMode);
 
@@ -51,6 +59,8 @@ public class ImportEditorLayout : Editor
         settings.AndroidMaxTextureSize = (ImportSettings.MaxTextureSizeEnum)EditorGUILayout.EnumPopup("Max Android Texture Size", settings.AndroidMaxTextureSize);
         EditorGUI.EndDisabledGroup();
         #endregion 
+
+        EditorGUI.EndDisabledGroup();
         #endregion
 
         //base.OnInspectorGUI();

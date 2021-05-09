@@ -91,6 +91,11 @@ public class AssetImporterTool : MonoBehaviour
 
                     textureImporter.SetPlatformTextureSettings(androidTextureSettings);
                 }
+                else
+                {
+                    //Make sure to stop overriding the Android settings, if they're disabled
+                    textureImporter.ClearPlatformTextureSettings("Android");
+                }
 
                 textureImporter.filterMode = importSettings.TetxureFilterMode;
                 textureImporter.maxTextureSize = (int)importSettings.MaxTextureSize;
@@ -122,6 +127,11 @@ public class AssetImporterTool : MonoBehaviour
                     };
 
                     audioImporter.SetOverrideSampleSettings("Android", androidAudioImportSettings);
+                }
+                else
+                {
+                    //Make sure to stop overriding the Android settings, if they're disabled
+                    audioImporter.ClearSampleSettingOverride("Android");
                 }
 
                 audioImporter.defaultSampleSettings = audioImportSettings;
