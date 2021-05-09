@@ -55,7 +55,7 @@ public class AssetImporterTool : MonoBehaviour
         }
     }
 
-    static void ApplyImportSettingsToAsset(string assetPath, ImportSettings importSettings)
+    public static void ApplyImportSettingsToAsset(string assetPath, ImportSettings importSettings)
     {
         AssetImporter importer = AssetImporter.GetAtPath(assetPath);
 

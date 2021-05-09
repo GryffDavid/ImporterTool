@@ -26,6 +26,6 @@ public class ImportSettings : ScriptableObject
     public FilterMode TetxureFilterMode;
     public AudioSampleRateSetting AudioSampleRate;
     public AudioClipLoadType AudioLoadType;
-
+    
     public MaxTextureSizeEnum MaxTextureSize = MaxTextureSizeEnum._2048;
 }
