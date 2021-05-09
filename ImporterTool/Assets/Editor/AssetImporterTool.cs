@@ -9,7 +9,18 @@ public class AssetImporterTool : MonoBehaviour
     static void ApplySettings()
     {
         //The path of the asset the user has selected
-        string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+        string path = "Assets";     //AssetDatabase.GetAssetPath(Selection.activeObject);
+        
+        foreach (Object selectedObject in Selection.GetFiltered<Object>(SelectionMode.Assets))
+        {
+            path = AssetDatabase.GetAssetPath(selectedObject);
+
+            if (!string.IsNullOrEmpty(path) && System.IO.File.Exists(path))
+            {
+                path = System.IO.Path.GetFileName(path);
+                break;
+            }
+        }
 
         //Find all the textures and audio in this folder, including subfolders
         string[] assetGUIDs = AssetDatabase.FindAssets("t:texture t:audioclip", new[] { path });
