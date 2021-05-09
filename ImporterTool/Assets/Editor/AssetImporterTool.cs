@@ -11,7 +11,7 @@ public class AssetImporterTool : MonoBehaviour
         ImportSettings currentSettings;
 
         //The path of the asset the user has selected
-        string path = "Assets";     //AssetDatabase.GetAssetPath(Selection.activeObject);
+        string path = "Assets";
         
         foreach (Object selectedObject in Selection.GetFiltered<Object>(SelectionMode.Assets))
         {
@@ -42,11 +42,6 @@ public class AssetImporterTool : MonoBehaviour
 
     static void ApplyImportSettingsToAsset(string assetPath, ImportSettings importSettings)
     {
-        //System.IO.DirectoryInfo directory = new System.IO.DirectoryInfo(assetPath);
-        //string path = AssetDatabase.GetAssetPath(Selection.activeObject);
-
-        //ImportSettings importSettings = FindImportSettings(path);
-
         AssetImporter importer = AssetImporter.GetAtPath(assetPath);
 
         TextureImporter textureImporter;
@@ -64,8 +59,8 @@ public class AssetImporterTool : MonoBehaviour
             if (audioImporter = importer as AudioImporter)
             {
                 AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings();
-                audioImportSettings.sampleRateSetting = AudioSampleRateSetting.OptimizeSampleRate;
-                audioImportSettings.loadType = AudioClipLoadType.CompressedInMemory;
+                audioImportSettings.sampleRateSetting = importSettings.AudioSampleRate;
+                audioImportSettings.loadType = importSettings.AudioLoadType;
 
                 audioImporter.defaultSampleSettings = audioImportSettings;
             }
@@ -78,13 +73,41 @@ public class AssetImporterTool : MonoBehaviour
         AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
     }
 
+    /// <summary>
+    /// Get an array of assets matching the type T in the path specified. Does not search child folders.
+    /// </summary>
+    /// <typeparam name="T">Type of asset to find</typeparam>
+    /// <param name="path">Path to search in</param>
+    /// <returns>Returns an array of assets</returns>
+    public static Object[] GetAssetsOfTypeAtPzth<T>(string path)
+    {
+        List<Object> assetList = new List<Object>();
+        string[] folderFiles = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(path));
+
+        foreach (string file in folderFiles)
+        {
+            Object asset = AssetDatabase.LoadAssetAtPath(file, typeof(T));
+
+            if (asset != null)
+            {
+                assetList.Add(asset);
+            }
+        }
+
+        return assetList.ToArray();
+    }
+
+    /// <summary>
+    /// Search up recursively for the ImportSettings object
+    /// </summary>
+    /// <param name="pathToSearch">Path to start searching at</param>
+    /// <returns>Relevant Import Settings</returns>
     static ImportSettings FindImportSettings(string pathToSearch)
     {
-        //I'm not happy with using a string here and not allowing the user the freedom to rename the ImportSettings asset. 
-        //I attempted to use AssetDatabase.FindAssets, but it does a BFS on the path it's assigned so it doesn't work with my upwards recursive approach        
+        Object[] importSettings = GetAssetsOfTypeAtPzth<ImportSettings>(pathToSearch);
 
         //Attempt to get the ImportSettings scriptable object at this path.
-        ImportSettings importSettings = AssetDatabase.LoadAssetAtPath<ImportSettings>(pathToSearch + "/ImportSettings.asset");
+        //ImportSettings importSettings = AssetDatabase.LoadAssetAtPath<ImportSettings>(pathToSearch + "/ImportSettings.asset");
 
         //Search recursively up the directory structure until we either find 
         //import settings or reach the main Assets folder with no results
@@ -105,7 +128,7 @@ public class AssetImporterTool : MonoBehaviour
         else //We found an ImportSettings object to use
         {
             Debug.Log("Found settings: " + pathToSearch);
-            return importSettings;
+            return (ImportSettings)importSettings[0];
         }
 
         return null;
