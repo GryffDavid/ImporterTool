@@ -33,14 +33,13 @@ public class ImportSettings : ScriptableObject
 
     public MaxTextureSizeEnum MaxTextureSize = MaxTextureSizeEnum._2048;
 
-    [Header("Android Override Settings")]    
-    public bool OverrideSettingsForAndroid = false;
-
-    [Space(10)]
+    [Header("Android Audio Overrides")]
+    public bool OverrideAudioSettingsForAndroid = false;
     public AudioSampleRateSetting AndroidAudioSampleRate;
     public AudioCompressionFormat AndroidCompressionFormat;
     public AudioClipLoadType AndroidAudioClipLoadType;
 
-    [Space(10)]
+    [Header("Android Texture Overrides")]
+    public bool OverrideTextureSettingsForAndroid = false;
     public MaxTextureSizeEnum AndroidMaxTextureSize = MaxTextureSizeEnum._2048;
 }

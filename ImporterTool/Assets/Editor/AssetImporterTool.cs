@@ -45,6 +45,7 @@ public class AssetImporterTool : MonoBehaviour
             Object[] assetsInFolder = GetAssetsOfTypeAtPzth<Object>(folder);
             ImportSettings newSettings = FindImportSettings(folder);
 
+            //If we found valid settings that apply to this folder, apply them to each asset we found in the folder
             if (newSettings != null)
             {
                 foreach (Object asset in assetsInFolder)
@@ -55,19 +56,25 @@ public class AssetImporterTool : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Attempt to apply the given settings to the asset found at the path
+    /// </summary>
+    /// <param name="assetPath">Path to the asset</param>
+    /// <param name="importSettings">Settings to apply</param>
     public static void ApplyImportSettingsToAsset(string assetPath, ImportSettings importSettings)
     {
-        AssetImporter importer = AssetImporter.GetAtPath(assetPath);
-
-        TextureImporter textureImporter;
-        AudioImporter audioImporter;
-
         if (importSettings != null)
         {
+            AssetImporter importer = AssetImporter.GetAtPath(assetPath);
+
+            TextureImporter textureImporter;
+            AudioImporter audioImporter;
+
+            #region Apply Texture Import Settings
             if (textureImporter = importer as TextureImporter)
             {
                 //TODO: If this is set to false, the assets need to be stopped from using android overrides
-                if (importSettings.OverrideSettingsForAndroid == true)
+                if (importSettings.OverrideTextureSettingsForAndroid == true)
                 {
                     TextureImporterPlatformSettings androidTextureSettings = new TextureImporterPlatformSettings()
                     {
@@ -83,7 +90,9 @@ public class AssetImporterTool : MonoBehaviour
                 textureImporter.maxTextureSize = (int)importSettings.MaxTextureSize;
                 textureImporter.anisoLevel = importSettings.FilterLevel;
             }
+            #endregion
 
+            #region Apply Audio Import Settings
             if (audioImporter = importer as AudioImporter)
             {
                 AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings()
@@ -93,7 +102,7 @@ public class AssetImporterTool : MonoBehaviour
                     loadType = importSettings.AudioLoadType
                 };
 
-                if (importSettings.OverrideSettingsForAndroid == true)
+                if (importSettings.OverrideAudioSettingsForAndroid == true)
                 {
                     AudioImporterSampleSettings androidAudioImportSettings = new AudioImporterSampleSettings()
                     {
@@ -107,13 +116,14 @@ public class AssetImporterTool : MonoBehaviour
 
                 audioImporter.defaultSampleSettings = audioImportSettings;
             }
+            #endregion
+
+            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
         }
         else
         {
             Debug.Log("Not import settings found");
-        }
-
-        AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+        }        
     }
 
     /// <summary>
@@ -133,6 +143,7 @@ public class AssetImporterTool : MonoBehaviour
         List<Object> assetList = new List<Object>();
         string[] folderFiles = Directory.GetFiles(path);
 
+        //Loop through each file in the folder. If the file is a matching asset, store it in the AssetList
         foreach (string file in folderFiles)
         {
             Object asset = AssetDatabase.LoadAssetAtPath(file, typeof(T));
