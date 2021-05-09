@@ -6,9 +6,12 @@ using System.IO;
 
 public class AssetImporterTool : MonoBehaviour
 {
+    static int s_validAssetCount = 0;
+
     [MenuItem("Assets/Apply Import Settings")]
     static void ApplySettings()
     {
+        s_validAssetCount = 0;
         string assetPath = "Assets";
         string settingsPath = "Assets";
         ImportSettings currentSettings = null;
@@ -61,6 +64,8 @@ public class AssetImporterTool : MonoBehaviour
                 }
             }
         }
+
+        Debug.Log($"Successfully applied settings to { s_validAssetCount } assets. {( s_validAssetCount == 0 ? "Check log for details." : "" )}");
     }
 
     /// <summary>
@@ -100,6 +105,7 @@ public class AssetImporterTool : MonoBehaviour
                 textureImporter.filterMode = importSettings.TetxureFilterMode;
                 textureImporter.maxTextureSize = (int)importSettings.MaxTextureSize;
                 textureImporter.anisoLevel = importSettings.FilterLevel;
+                s_validAssetCount++;
             }
             #endregion
 
@@ -135,6 +141,7 @@ public class AssetImporterTool : MonoBehaviour
                 }
 
                 audioImporter.defaultSampleSettings = audioImportSettings;
+                s_validAssetCount++;
             }
             #endregion
 
