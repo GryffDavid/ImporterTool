@@ -6,13 +6,34 @@ using UnityEditor;
 public class AssetImporterTool : MonoBehaviour
 {
     [MenuItem("Assets/Apply Import Settings")]
-    static void ApplyImportSettings()
+    static void ApplySettings()
     {
+        //The path of the asset the user has selected
         string path = AssetDatabase.GetAssetPath(Selection.activeObject);
 
-        ImportSettings importSettings = FindImportSettings(path);
+        //Find all the textures and audio in this folder, including subfolders
+        string[] assetGUIDs = AssetDatabase.FindAssets("t:texture t:audioclip", new[] { path });
 
-        AssetImporter importer = AssetImporter.GetAtPath(path);
+        ImportSettings currentSettings;
+
+        //Get the path of the asset from the GUID, then find the correct settings for that asset and apply them.
+        foreach (string assetGUID in assetGUIDs)
+        {
+            //I know that in this current state, the FindImportSettings function is run for every asset which isn't optimal, this is just for testing.
+            string assetPath = AssetDatabase.GUIDToAssetPath(assetGUID);
+            currentSettings = FindImportSettings(assetPath);
+            ApplyImportSettingsToAsset(assetPath, currentSettings);
+        }
+    }
+
+    static void ApplyImportSettingsToAsset(string assetPath, ImportSettings importSettings)
+    {
+        //System.IO.DirectoryInfo directory = new System.IO.DirectoryInfo(assetPath);
+        //string path = AssetDatabase.GetAssetPath(Selection.activeObject);
+
+        //ImportSettings importSettings = FindImportSettings(path);
+
+        AssetImporter importer = AssetImporter.GetAtPath(assetPath);
 
         TextureImporter textureImporter;
         AudioImporter audioImporter;
@@ -35,15 +56,20 @@ public class AssetImporterTool : MonoBehaviour
                 audioImporter.defaultSampleSettings = audioImportSettings;
             }
         }
+        else
+        {
+            Debug.Log("Not import settings found");
+        }
 
-        AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+        AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
     }
 
     static ImportSettings FindImportSettings(string pathToSearch)
     {
-        //Attempt to get the ImportSettings scriptable object at this path.
         //I'm not happy with using a string here and not allowing the user the freedom to rename the ImportSettings asset. 
         //I attempted to use AssetDatabase.FindAssets, but it does a BFS on the path it's assigned so it doesn't work with my upwards recursive approach        
+
+        //Attempt to get the ImportSettings scriptable object at this path.
         ImportSettings importSettings = AssetDatabase.LoadAssetAtPath<ImportSettings>(pathToSearch + "/ImportSettings.asset");
 
         //Search recursively up the directory structure until we either find 

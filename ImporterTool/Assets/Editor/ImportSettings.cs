@@ -20,6 +20,7 @@ public class ImportSettings : ScriptableObject
         _8192 = 8192
     };
 
+    [Range(0, 16)]
     public int FilterLevel = 1;
 
     public FilterMode TetxureFilterMode;
