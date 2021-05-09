@@ -9,48 +9,50 @@ public class AssetImporterTool : MonoBehaviour
     [MenuItem("Assets/Apply Import Settings")]
     static void ApplySettings()
     {
-        ImportSettings currentSettings;
+        //TODO: I think there's a better way to do this using SelectionMode.DeepAssets
 
-        //The path of the asset the user has selected
-        string path = "Assets";
-        
-        //TODO: If multiple files are selected here, only the first will have settings applied
+        //Go through each object the user has selected
         foreach (Object selectedObject in Selection.GetFiltered<Object>(SelectionMode.Assets))
         {
-            path = AssetDatabase.GetAssetPath(selectedObject);
+            string path = AssetDatabase.GetAssetPath(selectedObject);
 
-            //The user has selected a file to apply the settings to
+            //A file has been selected, find the settings and apply them
             if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
                 //Get the settings relevant to the file and apply them
-                currentSettings = FindImportSettings(Path.GetDirectoryName(path));
+
+                //I'm not happy that this finds settings separately for each selected file, even if they're in the same folder
+                ImportSettings currentSettings = FindImportSettings(Path.GetDirectoryName(path));                
                 ApplyImportSettingsToAsset(path, currentSettings);
-                return;
             }
-        }
-
-        //Find all the textures and audio in this folder, including subfolders
-        string[] assetGUIDs = AssetDatabase.FindAssets("t:texture t:audioclip", new[] { path });
-
-        //Use a HashSet to get a list of unique folders where assets reside. 
-        //Then loop through each asset in each unique folder, applying the relevant settings
-        HashSet<string> assetFolders = new HashSet<string>();
-        foreach (string assetGUID in assetGUIDs)
-        {            
-            assetFolders.Add(Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(assetGUID)));
-        }
-
-        foreach (string folder in assetFolders)
-        {
-            Object[] assetsInFolder = GetAssetsOfTypeAtPzth<Object>(folder);
-            ImportSettings newSettings = FindImportSettings(folder);
-
-            //If we found valid settings that apply to this folder, apply them to each asset we found in the folder
-            if (newSettings != null)
+            else //A folder has been selected. Find all the assets in the folder and apply the relevant settings
             {
-                foreach (Object asset in assetsInFolder)
+                //Find all the textures and audio in this folder, including sub folders
+                string[] assetGUIDs = AssetDatabase.FindAssets("t:texture t:audioclip", new[] { path });
+
+                //Use a HashSet to get a list of unique folders where assets reside. 
+                //Then loop through each asset in each unique folder, applying the relevant settings
+                HashSet<string> assetFolders = new HashSet<string>();
+                foreach (string guid in assetGUIDs)
                 {
-                    ApplyImportSettingsToAsset(AssetDatabase.GetAssetPath(asset.GetInstanceID()), newSettings);
+                    string folderPath = Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(guid));
+
+                    //HashSet.Add will only return true if the string does not exist in the HashSet already
+                    //This asset is a new folder, apply settings to all the assets inside
+                    if (assetFolders.Add(folderPath))
+                    {
+                        Object[] assetsInFolder = GetAssetsOfTypeAtPzth<Object>(folderPath);
+                        ImportSettings newSettings = FindImportSettings(folderPath);
+
+                        //If we found valid settings that apply to this folder, apply them to each asset we found in the folder
+                        if (newSettings != null)
+                        {
+                            foreach (Object asset in assetsInFolder)
+                            {
+                                ApplyImportSettingsToAsset(AssetDatabase.GetAssetPath(asset.GetInstanceID()), newSettings);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -67,12 +69,11 @@ public class AssetImporterTool : MonoBehaviour
         {
             AssetImporter importer = AssetImporter.GetAtPath(assetPath);
 
-            TextureImporter textureImporter;
-            AudioImporter audioImporter;
-
             #region Apply Texture Import Settings
-            if (textureImporter = importer as TextureImporter)
+            if (importer as TextureImporter != null)
             {
+                TextureImporter textureImporter = (TextureImporter)importer;
+
                 //TODO: If this is set to false, the assets need to be stopped from using android overrides
                 if (importSettings.OverrideTextureSettingsForAndroid == true)
                 {
@@ -93,8 +94,10 @@ public class AssetImporterTool : MonoBehaviour
             #endregion
 
             #region Apply Audio Import Settings
-            if (audioImporter = importer as AudioImporter)
+            if (importer as AudioImporter != null)
             {
+                AudioImporter audioImporter = (AudioImporter)importer;
+
                 AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings()
                 {
                     sampleRateSetting = importSettings.AudioSampleRate,
@@ -141,16 +144,19 @@ public class AssetImporterTool : MonoBehaviour
         }
 
         List<Object> assetList = new List<Object>();
-        string[] folderFiles = Directory.GetFiles(path);
+        IEnumerable folderFiles = Directory.EnumerateFiles(path);
 
         //Loop through each file in the folder. If the file is a matching asset, store it in the AssetList
         foreach (string file in folderFiles)
         {
-            Object asset = AssetDatabase.LoadAssetAtPath(file, typeof(T));
-
-            if (asset != null)
+            if (!file.EndsWith(".meta")) //Don't bother checking .meta files
             {
-                assetList.Add(asset);
+                Object asset = AssetDatabase.LoadAssetAtPath(file, typeof(T));
+
+                if (asset != null)
+                {
+                    assetList.Add(asset);
+                }
             }
         }
 
