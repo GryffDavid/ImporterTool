@@ -75,12 +75,12 @@ public class AssetImporterTool : MonoBehaviour
             AssetImporter importer = AssetImporter.GetAtPath(assetPath);
 
             #region Apply Texture Import Settings
-            if (importer.GetType() == typeof(TextureImporter))
+            if (importer.GetType() == typeof(TextureImporter) && importSettings.UseTextureSettings == true)
             {
                 TextureImporter textureImporter = (TextureImporter)importer;
 
                 //TODO: If this is set to false, the assets need to be stopped from using android overrides
-                if (importSettings.OverrideTextureSettingsForAndroid == true)
+                if (importSettings.OverrideAndroidTextureSettings == true)
                 {
                     TextureImporterPlatformSettings androidTextureSettings = new TextureImporterPlatformSettings()
                     {
@@ -99,22 +99,24 @@ public class AssetImporterTool : MonoBehaviour
             #endregion
 
             #region Apply Audio Import Settings
-            if (importer.GetType() == typeof(AudioImporter))
+            if (importer.GetType() == typeof(AudioImporter) && importSettings.UseAudioSettings == true)
             {
                 AudioImporter audioImporter = (AudioImporter)importer;
 
                 AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings()
                 {
                     sampleRateSetting = importSettings.AudioSampleRate,
+                    sampleRateOverride = (uint)importSettings.SampleRateOverride,
                     compressionFormat = importSettings.CompressionFormat,
                     loadType = importSettings.AudioLoadType                    
                 };
 
-                if (importSettings.OverrideAudioSettingsForAndroid == true)
+                if (importSettings.OverrideAndroidAudioSettings == true)
                 {
                     AudioImporterSampleSettings androidAudioImportSettings = new AudioImporterSampleSettings()
                     {
                         sampleRateSetting = importSettings.AndroidAudioSampleRate,
+                        sampleRateOverride = (uint)importSettings.AndroidSampleRateOverride,
                         compressionFormat = importSettings.AndroidCompressionFormat,
                         loadType = importSettings.AndroidAudioClipLoadType
                     };

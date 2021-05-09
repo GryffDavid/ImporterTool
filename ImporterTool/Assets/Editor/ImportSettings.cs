@@ -20,12 +20,26 @@ public class ImportSettings : ScriptableObject
         _8192 = 8192
     };
 
+    public enum SampleRateOverrideEnum
+    {
+        _8000Hz = 8000,
+        _11025Hz = 11025,
+        _22050Hz = 22050,
+        _44100Hz = 44100,
+        _48000Hz = 48000,
+        _96000Hz = 96000,
+        _192000Hz = 192000
+    };
+
     [Header("Audio Settings")]
+    public bool UseAudioSettings = true;
     public AudioSampleRateSetting AudioSampleRate;
+    public SampleRateOverrideEnum SampleRateOverride;
     public AudioCompressionFormat CompressionFormat;
-    public AudioClipLoadType AudioLoadType;    
+    public AudioClipLoadType AudioLoadType;
 
     [Header("Texture Settings")]
+    public bool UseTextureSettings = true;
     public FilterMode TetxureFilterMode;
 
     [Range(0, 16)]
@@ -34,12 +48,13 @@ public class ImportSettings : ScriptableObject
     public MaxTextureSizeEnum MaxTextureSize = MaxTextureSizeEnum._2048;
 
     [Header("Android Audio Overrides")]
-    public bool OverrideAudioSettingsForAndroid = false;
+    public bool OverrideAndroidAudioSettings = false;
     public AudioSampleRateSetting AndroidAudioSampleRate;
+    public SampleRateOverrideEnum AndroidSampleRateOverride;
     public AudioCompressionFormat AndroidCompressionFormat;
     public AudioClipLoadType AndroidAudioClipLoadType;
 
     [Header("Android Texture Overrides")]
-    public bool OverrideTextureSettingsForAndroid = false;
+    public bool OverrideAndroidTextureSettings = false;
     public MaxTextureSizeEnum AndroidMaxTextureSize = MaxTextureSizeEnum._2048;
 }
