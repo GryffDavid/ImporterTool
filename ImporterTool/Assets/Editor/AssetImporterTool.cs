@@ -9,27 +9,31 @@ public class AssetImporterTool : MonoBehaviour
     [MenuItem("Assets/Apply Import Settings")]
     static void ApplySettings()
     {
-        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        stopwatch.Start();
+        string assetPath = "Assets";
+        string settingsPath = "Assets";
+        ImportSettings currentSettings = null;
 
-        //Go through each object the user has selected
+        //Go through each object the user has selected - both folders and files
         foreach (Object selectedObject in Selection.GetFiltered<Object>(SelectionMode.Assets))
         {
-            string path = AssetDatabase.GetAssetPath(selectedObject);
+            assetPath = AssetDatabase.GetAssetPath(selectedObject);
 
             //A file has been selected, find the settings and apply them
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            if (!string.IsNullOrEmpty(assetPath) && File.Exists(assetPath))
             {
-                //Get the settings relevant to the file and apply them
-
-                //I'm not happy that this finds settings separately for each selected file, even if they're in the same folder
-                ImportSettings currentSettings = FindImportSettings(Path.GetDirectoryName(path));                
-                ApplyImportSettingsToAsset(path, currentSettings);
+                //Only search for new settings if the directory of the selected files has changed
+                if (Path.GetDirectoryName(settingsPath) != Path.GetDirectoryName(assetPath))
+                {
+                    settingsPath = assetPath;
+                    currentSettings = FindImportSettings(settingsPath);
+                }
+                
+                ApplyImportSettingsToAsset(assetPath, currentSettings);
             }
             else //A folder has been selected. Find all the assets in the folder and apply the relevant settings
             {
                 //Find all the textures and audio in this folder, including sub folders
-                string[] assetGUIDs = AssetDatabase.FindAssets("t:texture t:audioclip", new[] { path });
+                string[] assetGUIDs = AssetDatabase.FindAssets("t:texture t:audioclip", new[] { assetPath });
 
                 //Use a HashSet to get a list of unique folders where assets reside. 
                 //Then loop through each asset in each unique folder, applying the relevant settings
@@ -57,9 +61,6 @@ public class AssetImporterTool : MonoBehaviour
                 }
             }
         }
-
-        stopwatch.Stop();
-        Debug.Log(stopwatch.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -74,7 +75,7 @@ public class AssetImporterTool : MonoBehaviour
             AssetImporter importer = AssetImporter.GetAtPath(assetPath);
 
             #region Apply Texture Import Settings
-            if (importer as TextureImporter != null)
+            if (importer.GetType() == typeof(TextureImporter))
             {
                 TextureImporter textureImporter = (TextureImporter)importer;
 
@@ -98,7 +99,7 @@ public class AssetImporterTool : MonoBehaviour
             #endregion
 
             #region Apply Audio Import Settings
-            if (importer as AudioImporter != null)
+            if (importer.GetType() == typeof(AudioImporter))
             {
                 AudioImporter audioImporter = (AudioImporter)importer;
 
@@ -106,7 +107,7 @@ public class AssetImporterTool : MonoBehaviour
                 {
                     sampleRateSetting = importSettings.AudioSampleRate,
                     compressionFormat = importSettings.CompressionFormat,
-                    loadType = importSettings.AudioLoadType
+                    loadType = importSettings.AudioLoadType                    
                 };
 
                 if (importSettings.OverrideAudioSettingsForAndroid == true)
