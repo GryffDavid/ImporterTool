@@ -14,6 +14,7 @@ public class AssetImporterTool : MonoBehaviour
         //The path of the asset the user has selected
         string path = "Assets";
         
+        //TODO: If multiple files are selected here, only the first will have settings applied
         foreach (Object selectedObject in Selection.GetFiltered<Object>(SelectionMode.Assets))
         {
             path = AssetDatabase.GetAssetPath(selectedObject);
@@ -124,7 +125,7 @@ public class AssetImporterTool : MonoBehaviour
     /// </summary>
     /// <param name="pathToSearch">Path to start searching at</param>
     /// <returns>Relevant Import Settings</returns>
-    static ImportSettings FindImportSettings(string pathToSearch)
+    public static ImportSettings FindImportSettings(string pathToSearch)
     {
         //Find valid import settings in this path
         Object[] importSettings = GetAssetsOfTypeAtPzth<ImportSettings>(pathToSearch);
