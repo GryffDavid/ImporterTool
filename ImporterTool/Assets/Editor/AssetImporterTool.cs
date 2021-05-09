@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.IO;
 
 public class AssetImporterTool : MonoBehaviour
 {
@@ -18,10 +19,10 @@ public class AssetImporterTool : MonoBehaviour
             path = AssetDatabase.GetAssetPath(selectedObject);
 
             //The user has selected a file to apply the settings to
-            if (!string.IsNullOrEmpty(path) && System.IO.File.Exists(path))
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
                 //Get the settings relevant to the file and apply them
-                currentSettings = FindImportSettings(System.IO.Path.GetDirectoryName(path));
+                currentSettings = FindImportSettings(Path.GetDirectoryName(path));
                 ApplyImportSettingsToAsset(path, currentSettings);
                 return;
             }
@@ -58,9 +59,11 @@ public class AssetImporterTool : MonoBehaviour
 
             if (audioImporter = importer as AudioImporter)
             {
-                AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings();
-                audioImportSettings.sampleRateSetting = importSettings.AudioSampleRate;
-                audioImportSettings.loadType = importSettings.AudioLoadType;
+                AudioImporterSampleSettings audioImportSettings = new AudioImporterSampleSettings()
+                {
+                    sampleRateSetting = importSettings.AudioSampleRate,
+                    loadType = importSettings.AudioLoadType
+                };
 
                 audioImporter.defaultSampleSettings = audioImportSettings;
             }
@@ -81,8 +84,14 @@ public class AssetImporterTool : MonoBehaviour
     /// <returns>Returns an array of assets</returns>
     public static Object[] GetAssetsOfTypeAtPzth<T>(string path)
     {
+        //If this path is actually to a file, make sure to just get the directory.
+        if (File.Exists(path))
+        {
+            path = Path.GetDirectoryName(path);
+        }
+
         List<Object> assetList = new List<Object>();
-        string[] folderFiles = System.IO.Directory.GetFiles(System.IO.Path.GetDirectoryName(path));
+        string[] folderFiles = Directory.GetFiles(path);
 
         foreach (string file in folderFiles)
         {
@@ -104,30 +113,35 @@ public class AssetImporterTool : MonoBehaviour
     /// <returns>Relevant Import Settings</returns>
     static ImportSettings FindImportSettings(string pathToSearch)
     {
+        //Find valid import settings in this path
         Object[] importSettings = GetAssetsOfTypeAtPzth<ImportSettings>(pathToSearch);
-
-        //Attempt to get the ImportSettings scriptable object at this path.
-        //ImportSettings importSettings = AssetDatabase.LoadAssetAtPath<ImportSettings>(pathToSearch + "/ImportSettings.asset");
 
         //Search recursively up the directory structure until we either find 
         //import settings or reach the main Assets folder with no results
-        if (importSettings == null)
-        {
-            //We've reached the main Assets folder. Stop searching and warn the user that no settings were found
-            if (pathToSearch == "Assets")
+        if (importSettings.Length == 0)
+        {            
+            if (pathToSearch == "Assets") //We've reached the main Assets folder. Stop searching and warn the user that no settings were found
             {
                 Debug.Log("No import settings founds. Use Right Click > Create > ImportSettings to create some");
             }
             else
             {
                 //We didn't find anything in this directory. Let's try checking one level up.
-                pathToSearch = System.IO.Directory.GetParent(pathToSearch).ToString();
+                pathToSearch = Directory.GetParent(pathToSearch).ToString();
                 return FindImportSettings(pathToSearch);
             }
         }
         else //We found an ImportSettings object to use
         {
-            Debug.Log("Found settings: " + pathToSearch);
+            if (importSettings.Length > 1)
+            {
+                Debug.Log($"More than 1 ImportSettings object was found. Defaulting to first object found: {importSettings[0].name}");
+            }
+            else
+            {
+                Debug.Log($"Found settings: {pathToSearch}");
+            }
+
             return (ImportSettings)importSettings[0];
         }
 
