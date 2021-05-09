@@ -8,6 +8,8 @@ public class AssetImporterTool : MonoBehaviour
     [MenuItem("Assets/Apply Import Settings")]
     static void ApplySettings()
     {
+        ImportSettings currentSettings;
+
         //The path of the asset the user has selected
         string path = "Assets";     //AssetDatabase.GetAssetPath(Selection.activeObject);
         
@@ -15,17 +17,18 @@ public class AssetImporterTool : MonoBehaviour
         {
             path = AssetDatabase.GetAssetPath(selectedObject);
 
+            //The user has selected a file to apply the settings to
             if (!string.IsNullOrEmpty(path) && System.IO.File.Exists(path))
             {
-                path = System.IO.Path.GetFileName(path);
-                break;
+                //Get the settings relevant to the file and apply them
+                currentSettings = FindImportSettings(System.IO.Path.GetDirectoryName(path));
+                ApplyImportSettingsToAsset(path, currentSettings);
+                return;
             }
         }
 
         //Find all the textures and audio in this folder, including subfolders
         string[] assetGUIDs = AssetDatabase.FindAssets("t:texture t:audioclip", new[] { path });
-
-        ImportSettings currentSettings;
 
         //Get the path of the asset from the GUID, then find the correct settings for that asset and apply them.
         foreach (string assetGUID in assetGUIDs)
